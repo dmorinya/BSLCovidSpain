@@ -100,13 +100,13 @@ for (i in 1:length(table(cases$CCAA)))
   CA <- names(table(cases$CCAA))[i]
   print(CA)
   addTaskCallback(function(...) {set.seed(123);TRUE})
-  model <- BSLModel(fnSim = sim, fnSum = st,
-                    simArgs = list(T = 50), 
-                    theta0 = c(mean(cases$incid[cases$CCAA==CA])/0.9, 0.6, 0.5, 0.9, sd(cases$incid[cases$CCAA==CA])/0.9, 5.2, 0.3),
+  model <- newModel(fnSim = sim, fnSum = st,
+                    simArgs = list(T = 50, x1=c(rep(0, 30), rep(1, 20)), x2=c(rep(0, 10), rep(1, 40))), # x1, x2 define periods when restrictions/vaccination are implemented (may vary depending on the CCAA)
+                    theta0 = c(mean(cases$incid[cases$CCAA==CA])/0.9, 0.6, 0.5, 0.9, 0.2, 0.3, sd(cases$incid[cases$CCAA==CA])/0.9, 5.2, 0.3),
                     fnLogPrior = logPrior, thetaNames=c(expression(phi[0]), expression(alpha[1]), 
-                    expression(omega), "q", expression(sigma), "m", expression(beta)))
+                                                        expression(omega), "q", expression(beta[0]), expression(beta[1]), expression(beta[2]), expression(sigma), "m", expression(beta)))
   resultCovid <- bsl(y = cases$incid[cases$CCAA==CA], n = 500, M = 50000, model = model,
-                     diag(c(.01^2,.005^2,.005^2,.005^2,.01^2,.01^2,.01^2)),
+                     diag(c(.01^2,.005^2,.005^2,.005^2,.005^2,.005^2,.005^2,.01^2,.01^2)),
                      method = 'BSL', parallel=FALSE, verbose = FALSE)
 
   ### Parameter estimates and 95% credible intervals
