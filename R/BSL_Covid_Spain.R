@@ -20,15 +20,19 @@ logPrior <- function(theta)
       theta[5] > 0)
 }
 
-sim <- function(theta, T)
+sim <- function(theta, T, x1, x2)
 {
-  mu <- (exp(log(exp(theta[6])*exp(theta[7]))-log(exp(theta[6])+(exp(theta[7])-1)))-1)
-  x  <- theta[1]+arima.sim(model=list(order=c(1,0,0), ar=theta[2]), rand.gen=function(n, ...) rnorm(n, mean=mu, sd=theta[5]), n=T)
+  mu <- vector()
+  for (i in 1:T)
+  {
+    mu[i] <- (exp(log(exp(theta[8])*exp(theta[9]*i))-log(exp(theta[8])+(exp(theta[9]*i)-1)))-1)
+  }
+  x  <- theta[1]+arima.sim(model=list(order=c(1,0,0), ar=theta[2]), rand.gen=function(n, ...) rnorm(n, mean=mu, sd=theta[7]), n=T)
   z  <- rbinom(T, 1, theta[3])
-  y  <- x[1:T]*(1-z[1:T])+theta[4]*z[1:T]*x[1:T]
+  q <- theta[4]+theta[5]*x1+theta[6]*x2
+  y  <- x[1:T]*(1-z[1:T])+q[1:T]*z[1:T]*x[1:T]
   return(y)
 }
-
 st <- function(z){ 
   s1=mean(z); s2=sd(z); s3=acf(z,plot=F)$acf[2] 
   s4=acf(z,plot=F)$acf[3]; s5=acf(z,plot=F)$acf[4]
